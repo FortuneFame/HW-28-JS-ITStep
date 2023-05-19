@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        #current-weather,
+        #forecast {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #current-weather p,
+        #forecast p {
+            margin: 5px 0;
+        }
+
+        #current-weather img,
+        #forecast img {
+            margin-top: 10px;
+        }
+
+        .loader {
+            border: 10px solid #f3f3f3;
+            border-top: 10px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <form id="weather-form">
+        <input type="text" id="city-input" placeholder="Введите город">
+        <button type="button" id="get-weather-btn">Получить погоду</button>
+        <button type="button" id="get-weather-by-location-btn">Получить погоду по местоположению</button>
+    </form>
+    <div id="loader" class="loader" style="display: none;"></div>
+    <div id="current-weather" style="display: none;"></div>
+    <div id="forecast" style="display: none;"></div>
+    <script>
+        let countryCodes = {};
+        fetch('countryCodes.json')
+            .then(response => response.json())
+            .then(data => {
+                for (let item of data) {
+                    countryCodes[item.value] = item.text;
+                }
+            });
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        document.getElementById('get-weather-btn').addEventListener('click', async () => {
+
+            document.getElementById('current-weather').style.display = 'none';
+            document.getElementById('forecast').style.display = 'none';
+
+            const cityInput = document.getElementById('city-input');
+            const city = cityInput.value.trim();
+            if (!city || !/^[\p{L} \-', ]+$/u.test(city)) {
+                alert('Пожалуйста, введите правильное название города.');
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            await getWeather(city);
+
+
+            document.getElementById('loader').style.display = 'none';
+        });
+
+        document.getElementById('get-weather-by-location-btn').addEventListener('click', async () => {
+            const successCallback = async (position) => {
+                try {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=56de716cb7070fa6cc03b976fadc36c6&units=metric&lang=ru`);
+                    const data = await response.json();
+                    const cityName = `${data.name}, ${countryCodes[data.sys.country]}`;
+                    document.getElementById('city-input').value = cityName;
+                    await getWeather(cityName);
+                    document.getElementById('loader').style.display = 'none';
+                } catch (error) {
+                    alert('Произошла ошибка при получении погоды по местоположению.');
+                    document.getElementById('loader').style.display = 'none';
+                }
+            };
+
+            const errorCallback = (error) => {
+                alert('Не удалось получить местоположение. Пожалуйста, введите город вручную.');
+                document.getElementById('loader').style.display = 'none';
+            };
+
+            if (navigator.geolocation) {
+                document.getElementById('loader').style.display = 'block';
+                navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+            } else {
+                alert('Геолокация не поддерживается этим браузером. Пожалуйста, введите город вручную.');
+            }
+        });
+
+        async function getWeather(city) {
+            try {
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=56de716cb7070fa6cc03b976fadc36c6&units=metric&lang=ru`
+                );
+                if (!response.ok) {
+                    throw new Error('Не удалось получить данные о погоде для этого города.');
+                }
+                const data = await response.json();
+
+                const countryName = countryCodes[data.sys.country] || data.sys.country;
+
+
+                if (city.toLowerCase() === countryName.toLowerCase()) {
+                    alert('Название города и страны совпадают. Пожалуйста, введите действительное название города.');
+                    return;
+                }
+
+                let description = 'неизвестно';
+                if (data.weather && data.weather[0]) {
+                    description = capitalizeFirstLetter(data.weather[0].description);
+                }
+
+                const updateTime = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                const weatherUpdateTime = new Date(data.dt * 1000).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+
+
+                document.getElementById('current-weather').innerHTML = `
+          <h2>Текущая погода</h2>
+          <p>Город: ${data.name}</p>
+          <p>Страна: ${countryName}</p>
+          <p>Время запроса: ${updateTime}</p>
+          <p>
+            <svg width='20' heidth='20' xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" width="48"><path d="M480 896q-133 0-226.5-93.5T160 576q0-133 93.5-226.5T480 256q85 0 149 34.5T740 385V256h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220 576q0 109 75.5 184.5T480 836q83 0 152-47.5T728 663h62q-29 105-115 169t-195 64Z"/>
+            </svg>
+            Обновление:${weatherUpdateTime}</p>
+          <p>Температура: ${Math.round(data.main.temp)} &#8451;</p>
+          <img src="http://openweathermap.org/img/w/${data.weather[0].icon}.png">
+          <p>${capitalizeFirstLetter(data.weather[0].description)}</p>
+          <p>Скорость ветра: ${(data.wind.speed * 3.6).toFixed(2)} км/ч</p>
+          <p>Осадки: ${data.rain ? data.rain['1h'] : 0} мм</p>
+          <p>Давление: ${data.main.pressure} мбар</p>
+        `;
+
+                const forecastResponse = await fetch(
+                    `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=56de716cb7070fa6cc03b976fadc36c6&units=metric&lang=ru`
+                );
+                if (!forecastResponse.ok) {
+                    throw new Error('Не удалось получить прогноз погоды для этого города.');
+                }
+                const forecastData = await forecastResponse.json();
+                let forecastHTML = '<h2>Прогноз на 5 дней</h2>';
+
+                for (let i = 0; i < 5 * 8; i += 8) {
+                    const forecast = forecastData.list[i];
+                    const date = new Date(forecast.dt * 1000);
+                    const dayOfWeek = date.toLocaleDateString('ru-RU', { weekday: 'long' });
+                    const dateString = date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const dailyForecast = forecastData.list.slice(i, i + 8);
+                    const minTemp = Math.round(Math.min(...dailyForecast.map(item => item.main.temp_min)));
+                    const maxTemp = Math.round(Math.max(...dailyForecast.map(item => item.main.temp_max)));
+                    const icon = forecast.weather[0].icon;
+                    const description = capitalizeFirstLetter(forecast.weather[0].description);
+
+                    let dayTitle = '';
+                    if (i === 0) {
+                        dayTitle = 'Сегодня';
+                    } else {
+                        dayTitle = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+                    }
+
+                    forecastHTML += `
+                <p>${dayTitle}</p>
+                <p>${dateString}</p>
+                <img class="weather-icon" src="http://openweathermap.org/img/w/${icon}.png" alt="${description}">
+                <p>${description}</p>
+                <p>от ${minTemp} °C до ${maxTemp} °C</p>
+                `;
+                }
+
+                document.getElementById('current-weather').style.display = 'block';
+                document.getElementById('forecast').style.display = 'block';
+
+                document.getElementById('forecast').innerHTML = forecastHTML;
+
+            } catch (error) {
+                console.error('Ошибка при получении данных о погоде:', error);
+                alert('Не удалось получить данные о погоде. Пожалуйста, попробуйте еще раз.');
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        document.getElementById('city-input').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('get-weather-btn').click();
+            }
+        });
+    </script>
+</body>
+
+</html>
