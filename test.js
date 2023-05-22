@@ -119,14 +119,9 @@ class WeatherApp {
             if (data.weather && data.weather[0]) {
                 description = this.capitalizeFirstLetter(data.weather[0].description); // Форматирование описания погоды
             }
-            const currentDate = new Date().toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            }); // Форматирование текущей даты
+
             const updateTime = new Date().toLocaleTimeString('ru-RU', {
-                hour: '2-digit',
-                minute: '2-digit'
+                hour: '2-digit', minute: '2-digit'
             }); // Форматирование времени обновления
             const weatherUpdateTime = new Date(data.dt * 1000).toLocaleTimeString('ru-RU', {
                 hour: '2-digit',
@@ -134,32 +129,23 @@ class WeatherApp {
             }); // Форматирование времени погоды
 
             document.getElementById('current-weather').innerHTML = `
-                <div class="title">    
-                    <p class="country">${data.name}, ${countryName}</p>
-                    <h1 class="date">${currentDate} 
-                        <span class="hour">(${updateTime})</span>
-                        <span class="update"> 
-                            <svg width='10' heidth='10' xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" width="48">
-                                <path d="M480 896q-133 0-226.5-93.5T160 576q0-133 93.5-226.5T480 256q85 0 149 34.5T740 385V256h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220 576q0 109 75.5 184.5T480 836q83 0 152-47.5T728 663h62q-29 105-115 169t-195 64Z"/>
-                            </svg>
-                             ${currentDate} (${weatherUpdateTime})
-                        </span>
-                    </h1>
-                </div>
-                <div class="content">
-                    <div class="block-option">
-                        <div class="icon">
-                            <img class="icon-main" src="http://openweathermap.org/img/w/${data.weather[0].icon}.png">
-                            <p>${this.capitalizeFirstLetter(data.weather[0].description)}</p>
-                        </div>
-                        <h2 class="temp">${Math.round(data.main.temp)}°C</h2>
-                        <div class="description">
-                            <p>Скорость ветра: ${(data.wind.speed * 3.6).toFixed(2)} км/ч</p>
-                            <p>Осадки: ${data.rain ? data.rain['1h'] : 0} мм</p>
-                            <p>Давление: ${data.main.pressure} мбар</p>
-                        <div/>
-                    </div>
-                </div>  
+
+                <h2>Текущая погода</h2>
+                <p>Город: ${data.name}</p>
+                <p>Страна: ${countryName}</p>
+                <p>Время запроса: ${updateTime}</p>
+                <p>
+                <svg width='20' heidth='20' xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" width="48">
+                    <path d="M480 896q-133 0-226.5-93.5T160 576q0-133 93.5-226.5T480 256q85 0 149 34.5T740 385V256h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220 576q0 109 75.5 184.5T480 836q83 0 152-47.5T728 663h62q-29 105-115 169t-195 64Z"/>
+                </svg>
+                Обновление:${weatherUpdateTime}
+                </p>
+                <p>Температура: ${Math.round(data.main.temp)} &#8451;</p>
+                <img src="http://openweathermap.org/img/w/${data.weather[0].icon}.png">
+                <p>${this.capitalizeFirstLetter(data.weather[0].description)}</p>
+                <p>Скорость ветра: ${(data.wind.speed * 3.6).toFixed(2)} км/ч</p>
+                <p>Осадки: ${data.rain ? data.rain['1h'] : 0} мм</p>
+                <p>Давление: ${data.main.pressure} мбар</p>
             `;
 
             const forecastResponse = await fetch(
@@ -191,10 +177,11 @@ class WeatherApp {
 
                 forecastHTML += `
                     <div class="item">
-                        <p class='day'>${dayTitle}</p>
+                        <p>${dayTitle}</p>
                         <p>${dateString}</p>
                         <img class="weather-icon" src="http://openweathermap.org/img/w/${icon}.png" alt="${description}">
-                        <p>${minTemp}°C - ${maxTemp}°C</p>
+                        <p>${description}</p>
+                        <p>от ${minTemp} °C до ${maxTemp} °C</p>
                     </div>
                     `;
             }

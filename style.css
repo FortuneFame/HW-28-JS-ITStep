@@ -1,0 +1,159 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#current-weather,
+#forecast {
+    background-color: #fff;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    width: max-content;
+    margin: auto;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    background-color: #ff6b08;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ff6b08;
+    box-shadow: 0px 0px 5px 2px rgba(255, 107, 8, 0.29);
+}
+
+#current-weather p,
+#forecast p {
+    margin: 5px 0;
+}
+
+#current-weather{
+    margin-bottom: 20px;
+    width: 70%;
+    padding: 40px 40px;
+    box-shadow: 0px 0px 5px 2px rgba(255, 107, 8, 0.29);
+}
+#forecast{
+    width: 70%;
+    margin-bottom: 40px;
+    box-shadow: 0px 0px 5px 2px rgba(255, 107, 8, 0.29);
+}
+
+#weather-form{
+    margin-top: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #ff6b08;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#forecast {
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.item {
+    width: 170px;
+    text-align: center;
+    align-items: baseline;
+    border-radius: 5px;
+    margin: 5px;
+    box-shadow: 0px 0px 5px 2px rgba(255, 107, 8, 0.29);
+}
+
+.day {
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.weather-icon {
+    width: 70px;
+}
+
+.title {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.country {
+    font-size: 40px;
+    font-weight: 400;
+}
+
+.date {
+    font-size: 25px;
+    font-weight: 400;
+}
+
+
+.update{
+    display: flex;
+    text-align: center;
+    justify-content: flex-end;
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.block-option {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0px 0px 5px 2px rgba(255, 107, 8, 0.29);
+}
+
+.icon-main {
+    width: 70px;
+}
+
+.icon{
+    text-align: center;
+}
+
+.temp {
+    font-size: 60px;
+    font-weight: 400;
+    margin: 0;
+}
